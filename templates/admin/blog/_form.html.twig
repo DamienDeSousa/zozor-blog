@@ -7,7 +7,7 @@
 #}
 
 {% if show_confirmation|default(false) %}
-    {% set attr = {'data-confirmation': 'true'} %}
+    {% set attr = {'data-confirmation': 'true', 'novalidate': 'novalidate'} %}
     {{ include('blog/_delete_post_confirmation.html.twig') }}
 {% endif %}
 

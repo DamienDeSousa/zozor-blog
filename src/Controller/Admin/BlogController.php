@@ -54,36 +54,20 @@ class BlogController extends AbstractController
      */
     public function new(Request $request): Response
     {
+        // @todo: manage the form and the post.
         $post = new Post();
-        $post->setAuthor($this->getUser());
-
-        // See https://symfony.com/doc/current/book/forms.html#submitting-forms-with-multiple-buttons
-        $form = $this->createForm(PostType::class, $post)
-            ->add('saveAndCreateNew', SubmitType::class);
-
+        $form = $this->createForm(PostType::class, $post);
         $form->handleRequest($request);
 
-        // the isSubmitted() method is completely optional because the other
-        // isValid() method already checks whether the form is submitted.
-        // However, we explicitly add it to improve code readability.
-        // See https://symfony.com/doc/current/best_practices/forms.html#handling-form-submits
-        if ($form->isSubmitted() && $form->isValid()) {
+        //tester si le formulaire a été soumis
+        if($form->isSubmitted() && $form->isValid()) {
+            //do something
+            $post = $form->getData();
             $post->setSlug(Slugger::slugify($post->getTitle()));
-
+            $post->setAuthor($this->getUser());
             $em = $this->getDoctrine()->getManager();
             $em->persist($post);
             $em->flush();
-
-            // Flash messages are used to notify the user about the result of the
-            // actions. They are deleted automatically from the session as soon
-            // as they are accessed.
-            // See https://symfony.com/doc/current/book/controller.html#flash-messages
-            $this->addFlash('success', 'post.created_successfully');
-
-            if ($form->get('saveAndCreateNew')->isClicked()) {
-                return $this->redirectToRoute('admin_post_new');
-            }
-
             return $this->redirectToRoute('admin_post_index');
         }
 
@@ -91,6 +75,7 @@ class BlogController extends AbstractController
             'post' => $post,
             'form' => $form->createView(),
         ]);
+        //DONE
     }
 
     /**
@@ -100,13 +85,9 @@ class BlogController extends AbstractController
      */
     public function show(Post $post): Response
     {
-        // This security check can also be performed
-        // using an annotation: @IsGranted("show", subject="post")
-        $this->denyAccessUnlessGranted('show', $post, 'Posts can only be shown to their authors.');
-
-        return $this->render('admin/blog/show.html.twig', [
-            'post' => $post,
-        ]);
+        // @todo: render the template with the post
+        return $this->render('admin/blog/show.html.twig', ['post' => $post]);
+        //DONE
     }
 
     /**
@@ -122,17 +103,16 @@ class BlogController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $post->setSlug(Slugger::slugify($post->getTitle()));
-            $this->getDoctrine()->getManager()->flush();
-
+            // @todo: persist the update
+            $em = $this->getDoctrine()->getManager();
+            $em->flush();
             $this->addFlash('success', 'post.updated_successfully');
 
             return $this->redirectToRoute('admin_post_edit', ['id' => $post->getId()]);
         }
 
-        return $this->render('admin/blog/edit.html.twig', [
-            'post' => $post,
-            'form' => $form->createView(),
-        ]);
+        // @todo rendrer the post and form
+        return $this->render('admin/blog/edit.html.twig', ['post' => $post, 'form' => $form->createView()]);
     }
 
     /**
@@ -152,6 +132,7 @@ class BlogController extends AbstractController
         // because foreign key support is not enabled by default in SQLite
         $post->getTags()->clear();
 
+        // @todo: delete the post
         $em = $this->getDoctrine()->getManager();
         $em->remove($post);
         $em->flush();
